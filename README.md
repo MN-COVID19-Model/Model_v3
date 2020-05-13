@@ -1,10 +1,18 @@
 # The Minnesota COVID-19 Model
 
-© 2020 Regents of the University of Minnesota. 
+© 2020 Regents of the University of Minnesota. This software is licensed via the GNU General Public License 3.0.
 
-This software is licensed via the GNU General Public License 3.0.
+This source code is provided "as-is" free of charge for use and modification, with attribution. Use of the code requires knowledge of the R programming language and mathematical modeling.  
 
 More information: https://www.sph.umn.edu/research/projects/covid-19-model-code/ 
+
+## Important code information:
+- The provided R code is pre-programmed to run scenarios 1-4 in version 3.0 of the Minnesota COVID-19 model.
+- Model parameters are set to base case values by default. 
+- To generate ICU demand outcomes as reported in our results, run scenario code with unconstrained ICU capacity. To do so uncomment [line 92](https://github.com/MN-COVID19-Model/Model_v3/blob/742bf4eb323b9769af2e9c5a2d8131e1bc652848/R/scenarios_script.R#L92) of ```scenarios_script.R``` .
+- To generate all other outcomes, run scenario code with default ICU capacity constraints.
+- Provided code can also be used to generate plots of outcomes over time (ICU demand, prevalent infections, cumulative deaths, etc.).
+- Using the code assumes basic knowledge of R and use of mathematical models. *Technical support, over and above the existing documentation and FAQs (refer to links below), is unavailable.*
 
 ## How to use:
 First, navigate to 'MNCOVID19/R' and open 'MNCOVID19.Rproj'. This will automatically set your working directory and ensure that the correct files are accessed by the various scripts in the repository.
