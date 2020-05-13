@@ -12,7 +12,8 @@ This source code is provided "as-is" free of charge for use and modification, wi
 - Provided code can also be used to generate plots of outcomes over time (ICU demand, prevalent infections, cumulative deaths, etc.).
 - Using the code assumes basic knowledge of R and use of mathematical models. *Technical support, over and above the existing documentation and FAQs (refer to links below), is unavailable.*
 
-For more information (include Scenario 1-4 results and model documentation) see: https://www.sph.umn.edu/research/projects/covid-19-model-code/
+For more information (including Scenario 1-4 results and model documentation): 
+https://www.sph.umn.edu/research/projects/covid-19-model-code/
 
 ## How to use:
 First, navigate to ```MNCOVID19/R``` and open ```MNCOVID19.Rproj```. This will automatically set your working directory and ensure that the correct files are accessed by the various scripts in the repository.
