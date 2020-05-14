@@ -32,7 +32,7 @@ source("setup_model.R")
 #       vulnerable populations continue to social distance until 30 days past peak
 
 # Scenarios to be run
-scn_vec <- c("1", "2", "3", "4")
+scn_vec <- c("1", "2", "3", "4", "5")
 
 # Intializing lists to store the raw model output and processed model output
 lst_out_raw <- list()
@@ -86,6 +86,19 @@ for (i in 1:length(scn_vec)) {
     parms$sixty_plus_days_past_peak <- 30
     
   }
+  
+  else if (i_scenario == "5") {
+    parms$start_time_social_distancing <- 1
+    parms$end_time_social_distancing <- -Inf
+    parms$start_time_sip <- 6
+    parms$end_time_sip <- 6+42
+    parms$start_time_60plus_distancing <- 1+5+42+21
+    parms$end_time_60plus_distancing <- -Inf
+    parms$sixty_plus_days_past_peak <- 30
+    
+  }
+  
+  
   
   ## NOTE: To estimate maximum ICU demand ##
   # UNCOMMENT line below to generate ICU demand estimates for all scenarios (under unconstrainted ICU capacity)
