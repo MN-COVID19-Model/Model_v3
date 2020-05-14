@@ -43,7 +43,7 @@
 #' @param v_strat_status a vector that will be used in the solve_model() function which indicates which social distancing strategies are being used
 #' @param prop_asymptomatic vector that contains the proportion of each age groups which is asymptomatic
 #' @param p_h_80 probability of being hospitalized for individuals 80 years of age or older
-#' @param p_dying_home_80 probability of dying at home for 80+ year old people who have a symptomatic infection
+#' @param p_dying_home_80 probability of dying at home for 70+ year old people who have a symptomatic infection
 #' @param timestep length of timesteps in days used by the solver function, should be 1 or less, ideally it should be 0.05 or less to ensure 
 #' accurate calculations 
 #'
