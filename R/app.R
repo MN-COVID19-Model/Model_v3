@@ -1,4 +1,8 @@
 library(shiny)
+library(shinycssloaders)
+
+# Set up the loading gif
+options(spinner.color="#0275D8", spinner.color.background="#ffffff", spinner.size=2)
 
 ## Load necessary packages, source files, and load data ##
 source("setup_model.R")
@@ -20,28 +24,39 @@ ui <- fluidPage(
       ),
     mainPanel(      
       tabsetPanel(
-        tabPanel("ICU Bed Demand", plotOutput("icu_bed_demand_plot")), 
+        tabPanel("ICU Bed Demand", withSpinner(plotOutput("icu_bed_demand_plot"), type = 8)), 
         tabPanel("Cumulative Deaths", plotOutput("cumulative_deaths_plot")), 
         tabPanel("Prevalent Infections", plotOutput("prevalent_infections_plot")),
         tabPanel("Cumulative Infections", plotOutput("cumulative_infections_plot")),
         tabPanel("Daily Deaths", plotOutput("daily_deaths_plot")),
         tabPanel("Prevalent Hospitalizations", plotOutput("prevalent_hospitalizations_plot"))
-    ))
+    ),
+      tableOutput("simulations_table"))
   )
 )
 
 # Define server logic ----
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   baseline_date_as_integer = 18343 # set to march 22 2020, per model
   
-  
+  session$userData$params = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("simulation_number", "sip_end_date", "social_distancing_end_date"))
+  session$userData$results = matrix(nrow = length(scn_vec), ncol = 8)
+  colnames(session$userData$results) <- c("simulation_number", 
+                             "n_deaths", 
+                             "n_deaths_may30",
+                             "day_icu_cap_reached",
+                             "max_icu_demand",
+                             "Rt_est",
+                             "day_peak_infections",
+                             "additional_vulnerable_sd_days")
+  session$userData$lst_out_raw <- list()
+  session$userData$lst_out <- list()
+
   runModel <- reactive({
     input$simulationButton
     
     # Intializing lists to store the raw model output and processed model output
-    lst_out_raw <- list()
-    lst_out <- list()
     
     # Initializing a matrix to store printed summary output from model
     summary_out <- matrix(nrow = length(scn_vec), ncol = 8)
@@ -63,6 +78,11 @@ server <- function(input, output) {
     parms$start_time_sip <- 6 # March 27th
     parms$end_time_sip <- as.integer(isolate(input$shelter_in_place_end_date) - baseline_date_as_integer)
     
+    # Save parameters to simulations table
+    session$userData$params[input$simulationButton,] <- list(as.character(input$simulationButton), 
+                                                          isolate(format(as.Date(input$shelter_in_place_end_date),format="%m/%d/%Y")),
+                                                          isolate(format(as.Date(input$social_distancing_end_date), format="%m/%d/%Y")))
+    
     # Run model
     m_out_raw <- solve_model(parms$init_vec, 
                              times = times,
@@ -70,11 +90,11 @@ server <- function(input, output) {
                              parms = parms)
     
     # Store the raw output from each strategy in a list
-    lst_out_raw <- c(lst_out_raw, list(m_out_raw))
+    session$userData$lst_out_raw <- c(session$userData$lst_out_raw, list(m_out_raw))
     
     # Process output matrix "out" to extract more data
     out <- process_output(m_out_raw,parms)
-    lst_out <- c(lst_out,list(out))
+    session$userData$lst_out <- c(session$userData$lst_out,list(out))
     
     
     ## Store select summary outputs ##
@@ -105,15 +125,15 @@ server <- function(input, output) {
                                        NA)
     
     # Store summary results in matrix
-    summary_out[i,] <- c(i_scenario, n_deaths, n_deaths_may30, 
+    session$userData$results[input$simulationButton,] <- c(i_scenario, n_deaths, n_deaths_may30, 
                          day_icu_cap_reached, max_icu_demand, 
                          Rt_est, day_peak_infections, 
                          n_add_vulnerable_sd_days)
     
     ## Create data.frame for plotting
-    df_ls <- lapply(1:length(lst_out), FUN = function(x) {
-      df <- as.data.frame(lst_out[[x]][, 1:6])
-      df$t <- 1:nrow(lst_out[[x]])
+    df_ls <- lapply(1:length(session$userData$lst_out), FUN = function(x) {
+      df <- as.data.frame(session$userData$lst_out[[x]][, 1:6])
+      df$t <- 1:nrow(session$userData$lst_out[[x]])
       df$strategy <- scn_vec[x]
       return(df)
     })
@@ -212,6 +232,11 @@ server <- function(input, output) {
     plot_func("prevalent_hospitalizations")
   })
   
+  output$simulations_table <- renderTable({
+    input$simulationButton
+    session$userData$params
+    },
+    display = c('s','d','s','s'))
 
 }
 
