@@ -222,4 +222,4 @@ plot_func("prevalent_hospitalizations")
 
 
 ## UNCOMMENT to print matrix of summary output measures
-print(summary_out)
+#print(summary_out)
