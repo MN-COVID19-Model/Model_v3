@@ -32,7 +32,7 @@ source("setup_model.R")
 #       vulnerable populations continue to social distance until 30 days past peak
 #   5 = Extend Scenario 4 stay-at-home order from 42 days to 51 days (May 18th)
 #   6 = Extend Scenario 4 stay-at-home order from 51 days to 65 days
-#   99 = Stay-at-home for entire epidemic (added in response to public inquiry)
+#   99 = Stay-at-home for entire epidemic (for comparison purposes)
 
 # Scenarios to be run
 #scn_vec <- c("1", "2", "3", "4", "5", "6", "99")
