@@ -30,9 +30,13 @@ source("setup_model.R")
 #   4 = Extend Scenario 3 stay-at-home order from 14 days to 42 days; 
 #       lifting of stay-at-home is followed by 21 days social distancing for all; 
 #       vulnerable populations continue to social distance until 30 days past peak
+#   5 = Extend Scenario 4 stay-at-home order from 42 days to 51 days (May 18th)
+#   6 = Extend Scenario 4 stay-at-home order from 51 days to 65 days
+#   99 = Stay-at-home for entire epidemic (for comparison purposes)
 
 # Scenarios to be run
-scn_vec <- c("1", "2", "3", "4")
+#scn_vec <- c("1", "2", "3", "4", "5", "6", "99")
+scn_vec <- c("1", "2", "3", "4", "5", "6")
 
 # Intializing lists to store the raw model output and processed model output
 lst_out_raw <- list()
@@ -82,6 +86,33 @@ for (i in 1:length(scn_vec)) {
     parms$start_time_sip <- 6
     parms$end_time_sip <- 6+42
     parms$start_time_60plus_distancing <- 1+5+42+21
+    parms$end_time_60plus_distancing <- -Inf
+    parms$sixty_plus_days_past_peak <- 30
+    
+  } else if (i_scenario == "5") {
+    parms$start_time_social_distancing <- 1
+    parms$end_time_social_distancing <- 1+5+51+21
+    parms$start_time_sip <- 6
+    parms$end_time_sip <- 6+51
+    parms$start_time_60plus_distancing <- 1+5+51+21
+    parms$end_time_60plus_distancing <- -Inf
+    parms$sixty_plus_days_past_peak <- 30
+
+  } else if (i_scenario == "6") {
+    parms$start_time_social_distancing <- 1
+    parms$end_time_social_distancing <- 1+5+65+21
+    parms$start_time_sip <- 6
+    parms$end_time_sip <- 6+65
+    parms$start_time_60plus_distancing <- 1+5+65+21
+    parms$end_time_60plus_distancing <- -Inf
+    parms$sixty_plus_days_past_peak <- 30
+        
+  } else if (i_scenario == "99") {
+    parms$start_time_social_distancing <- 1
+    parms$end_time_social_distancing <- 1+5+365
+    parms$start_time_sip <- 6
+    parms$end_time_sip <- 6+365
+    parms$start_time_60plus_distancing <- 1+5+365
     parms$end_time_60plus_distancing <- -Inf
     parms$sixty_plus_days_past_peak <- 30
     
@@ -191,4 +222,4 @@ plot_func("prevalent_hospitalizations")
 
 
 ## UNCOMMENT to print matrix of summary output measures
-# print(summary_out)
+#print(summary_out)
