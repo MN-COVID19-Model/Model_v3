@@ -19,6 +19,7 @@ ui <- fluidPage(
                 value = ""),
       dateInput("social_distancing_end_date", 
                 h3("End Date for Social Distancing"), 
+                format = "MM d, yyyy",
                 value = ""),
       actionButton("simulationButton", "Run Simulation", icon("play"), style="color: #fff; background-color: #4CAF50"),
       actionButton("clearSimulationsButton", "Clear Simulations", icon("trash"))
@@ -45,7 +46,7 @@ server <- function(input, output, session) {
 ✅This model is intended to show the possible differences in outcomes from different mitigation strategies, rather than precisely estimating mortality numbers \n
 ✅Every model, including this one, relies on a simplified representation of the world. This means many factors that may influence the progression of the disease are not accounted for in this model. \n
 ✅The code used to create the underlying model was created by the University of Minnesota and the code used to build this web app was created by Carston Hernke. Both sets of code are licensed via the GNU General Public License 3.0, which makes them freely available for reuse. The source code is available here: https://github.com/carstonhernke/Model_v3.",
-    asyClose = TRUE,
+    easyClose = TRUE,
     footer = modalButton("I Understand")
   ))
   
@@ -84,11 +85,8 @@ server <- function(input, output, session) {
     if(input$simulationButton==0){
       return(null)
     }
-    input$simulationButton
     
-    # Intializing lists to store the raw model output and processed model output
-    
-    # Initializing a matrix to store printed summary output from model
+    scn_vec <- seq(1,input$simulationButton)    # Initializing a matrix to store printed summary output from model
     summary_out <- matrix(nrow = length(scn_vec), ncol = 8)
     colnames(summary_out) <- c("strategy", 
                                "n_deaths", 
@@ -108,7 +106,11 @@ server <- function(input, output, session) {
     parms$start_time_sip <- 6 # March 27th
     parms$end_time_sip <- as.integer(isolate(input$shelter_in_place_end_date) - baseline_date_as_integer)
     
-    # Save parameters to simulations table
+    # Sapecify time horizon of model output (in days); default = 365 (1 year)
+    # Day 1 = March 22, 2020
+    times <- seq(1, 365, by = parms$timestep)
+    
+    # Sve parameters to simulations table
     session$userData$params[input$simulationButton,] <- list(as.character(input$simulationButton), 
                                                           isolate(format(as.Date(input$shelter_in_place_end_date),format="%m/%d/%Y")),
                                                           isolate(format(as.Date(input$social_distancing_end_date), format="%m/%d/%Y")))
