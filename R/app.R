@@ -16,11 +16,12 @@ ui <- fluidPage(
       dateInput("shelter_in_place_end_date", 
                 h3("End Date for Shelter-in-Place (Stay at Home Order"), 
                 format = "MM d, yyyy",
-                value = "2020-05-19"),
+                value = ""),
       dateInput("social_distancing_end_date", 
                 h3("End Date for Social Distancing"), 
-                value = "2020-08-01"),
-      actionButton("simulationButton", "Run Simulation")
+                value = ""),
+      actionButton("simulationButton", "Run Simulation", icon("play"), style="color: #fff; background-color: #4CAF50"),
+      actionButton("clearSimulationsButton", "Clear Simulations", icon("trash"))
       ),
     mainPanel(      
       tabsetPanel(
@@ -38,10 +39,20 @@ ui <- fluidPage(
 # Define server logic ----
 server <- function(input, output, session) {
   
+  showModal(modalDialog(
+    title = "Disclaimer",
+    "👋This tool is designed to make it easy to run simulations using the COVID-19 model developed by the University of Minnesota (documentation: https://mn.gov/covid19/data/modeling/)
+✅This model is intended to show the possible differences in outcomes from different mitigation strategies, rather than precisely estimating mortality numbers \n
+✅Every model, including this one, relies on a simplified representation of the world. This means many factors that may influence the progression of the disease are not accounted for in this model. \n
+✅The code used to create the underlying model was created by the University of Minnesota and the code used to build this web app was created by Carston Hernke. Both sets of code are licensed via the GNU General Public License 3.0, which makes them freely available for reuse. The source code is available here: https://github.com/carstonhernke/Model_v3.",
+    asyClose = TRUE,
+    footer = modalButton("I Understand")
+  ))
+  
   baseline_date_as_integer = 18343 # set to march 22 2020, per model
   
   session$userData$params = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("simulation_number", "sip_end_date", "social_distancing_end_date"))
-  session$userData$results = matrix(nrow = length(scn_vec), ncol = 8)
+  session$userData$results = data.frame(matrix(nrow = 0, ncol = 8))
   colnames(session$userData$results) <- c("simulation_number", 
                              "n_deaths", 
                              "n_deaths_may30",
@@ -52,8 +63,27 @@ server <- function(input, output, session) {
                              "additional_vulnerable_sd_days")
   session$userData$lst_out_raw <- list()
   session$userData$lst_out <- list()
+  
+  # clearSimulations <- reactive(
+  #   {
+  #     input$clearSimulationsButton
+  #     session$userData$params = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("simulation_number", "sip_end_date", "social_distancing_end_date"))
+  #     session$userData$results = matrix(nrow = length(1), ncol = 8)
+  #     colnames(session$userData$results) <- c("simulation_number", 
+  #                                             "n_deaths", 
+  #                                             "n_deaths_may30",
+  #                                             "day_icu_cap_reached",
+  #                                             "max_icu_demand",
+  #                                             "Rt_est",
+  #                                             "day_peak_infections",
+  #                                             "additional_vulnerable_sd_days")
+  #     showNotification("Simulations Cleared")
+  # })  
 
   runModel <- reactive({
+    if(input$simulationButton==0){
+      return(null)
+    }
     input$simulationButton
     
     # Intializing lists to store the raw model output and processed model output
@@ -125,10 +155,14 @@ server <- function(input, output, session) {
                                        NA)
     
     # Store summary results in matrix
-    session$userData$results[input$simulationButton,] <- c(i_scenario, n_deaths, n_deaths_may30, 
-                         day_icu_cap_reached, max_icu_demand, 
-                         Rt_est, day_peak_infections, 
-                         n_add_vulnerable_sd_days)
+    session$userData$results[input$simulationButton,] <- c(input$simulationButton, 
+                                                           n_deaths, 
+                                                           n_deaths_may30, 
+                                                           day_icu_cap_reached, 
+                                                           max_icu_demand,
+                                                           Rt_est,
+                                                           day_peak_infections,
+                                                           n_add_vulnerable_sd_days)
     
     ## Create data.frame for plotting
     df_ls <- lapply(1:length(session$userData$lst_out), FUN = function(x) {
@@ -234,10 +268,8 @@ server <- function(input, output, session) {
   
   output$simulations_table <- renderTable({
     input$simulationButton
-    session$userData$params
-    },
-    display = c('s','d','s','s'))
-
+    merge(x = session$userData$params, y = session$userData$results, by = "simulation_number", all.x = TRUE)
+  })
 }
 
 # Run the app ----
