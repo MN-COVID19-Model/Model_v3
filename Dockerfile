@@ -22,11 +22,11 @@ COPY R /srv/shiny-server/R
 COPY data /srv/shiny-server/data
 
 # select port
-EXPOSE 3838
+EXPOSE 80
 
 # allow permission
 RUN sudo chown -R shiny:shiny /srv/shiny-server
 
 # run app
 WORKDIR /srv/shiny-server
-CMD R -e "shiny::runApp('R', port = 3838, host = '0.0.0.0')"
+CMD R -e "shiny::runApp('R', port = 80, host = '0.0.0.0')"
